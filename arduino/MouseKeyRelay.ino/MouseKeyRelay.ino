@@ -23,33 +23,44 @@
 
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "SoftwareSerial.h"
 
+/*
 // set pin numbers for the five buttons:
 const int upButton = 2;
 const int downButton = 3;
 const int leftButton = 4;
 const int rightButton = 5;
 const int mouseButton = 6;
+*/
+SoftwareSerial mySerial(8, 3);
 
 void setup() { // initialize the buttons' inputs:
+/*
   pinMode(upButton, INPUT);
   pinMode(downButton, INPUT);
   pinMode(leftButton, INPUT);
   pinMode(rightButton, INPUT);
   pinMode(mouseButton, INPUT);
-
+*/
   Serial.begin(9600);
   // initialize mouse control:
   Mouse.begin();
   Keyboard.begin();
+  /*
+  while (!Serial) {
+    ; // シリアルポートの準備ができるのを待つ(Leonardoのみ必要)
+  }
+  */
+  mySerial.begin(9600);
 }
 
 void loop() {
   // use serial input to control the mouse:
-  if (Serial.available() > 0) {
-    char inChar = Serial.read();
-
-    switch (inChar) {
+  if(mySerial.available() > 0) {
+      char inChar = mySerial.read();
+      mySerial.write(inChar);
+      switch (inChar) {
       case 'u':
         // move mouse up
         Mouse.move(0, -40);
@@ -70,9 +81,12 @@ void loop() {
         // perform mouse left click
         Mouse.click(MOUSE_LEFT);
         break;
+      default :
+        Keyboard.write(inChar);
+        break;
     }
   }
-
+/*
   // use the pushbuttons to control the keyboard:
   if (digitalRead(upButton) == HIGH) {
     Keyboard.write('u');
@@ -89,5 +103,5 @@ void loop() {
   if (digitalRead(mouseButton) == HIGH) {
     Keyboard.write('m');
   }
-
+*/
 }
