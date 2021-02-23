@@ -25,83 +25,90 @@
 #include "Mouse.h"
 #include "SoftwareSerial.h"
 
-/*
-// set pin numbers for the five buttons:
-const int upButton = 2;
-const int downButton = 3;
-const int leftButton = 4;
-const int rightButton = 5;
-const int mouseButton = 6;
-*/
 SoftwareSerial mySerial(8, 3);
 
 void setup() { // initialize the buttons' inputs:
-/*
-  pinMode(upButton, INPUT);
-  pinMode(downButton, INPUT);
-  pinMode(leftButton, INPUT);
-  pinMode(rightButton, INPUT);
-  pinMode(mouseButton, INPUT);
-*/
+
   Serial.begin(9600);
   // initialize mouse control:
   Mouse.begin();
   Keyboard.begin();
   /*
   while (!Serial) {
-    ; // ƒVƒŠƒAƒ‹ƒ|[ƒg‚Ì€”õ‚ª‚Å‚«‚é‚Ì‚ð‘Ò‚Â(Leonardo‚Ì‚Ý•K—v)
+    ; // ã‚·ãƒªã‚¢ãƒ«ãƒãƒ¼ãƒˆã®æº–å‚™ãŒã§ãã‚‹ã®ã‚’å¾…ã¤(Leonardoã®ã¿å¿…è¦)
   }
   */
   mySerial.begin(9600);
+  Keyboard.releaseAll();
 }
 
 void loop() {
   // use serial input to control the mouse:
   if(mySerial.available() > 0) {
-      char inChar = mySerial.read();
-      mySerial.write(inChar);
-      switch (inChar) {
-      case 'u':
-        // move mouse up
-        Mouse.move(0, -40);
-        break;
-      case 'd':
-        // move mouse down
-        Mouse.move(0, 40);
-        break;
-      case 'l':
-        // move mouse left
-        Mouse.move(-40, 0);
-        break;
-      case 'r':
-        // move mouse right
-        Mouse.move(40, 0);
-        break;
-      case 'm':
-        // perform mouse left click
-        Mouse.click(MOUSE_LEFT);
-        break;
-      default :
-        Keyboard.write(inChar);
-        break;
-    }
+      String inString = mySerial.readStringUntil(';');
+      // mySerial.writeString(inChar);
+      int inChar = inString.toInt();
+      Serial.println(inString);
+      if (inChar < 0x400){
+        switch (inChar){
+          case 128:
+          case 129:
+          case 130:
+            Keyboard.press(inChar);
+            break;
+          case 131:
+          case 132:
+          case 133:
+            Keyboard.release(inChar - 3);
+            break;
+          case 640:
+            Mouse.release(MOUSE_LEFT);
+            break;
+          case 641:
+            Mouse.click(MOUSE_LEFT);
+            break;
+          case 642:
+            Mouse.press(MOUSE_LEFT);
+            break;
+          case 768:
+            Mouse.release(MOUSE_RIGHT);
+            break;
+          case 769:
+            Mouse.click(MOUSE_RIGHT);
+            break;
+          case 770:
+            Mouse.press(MOUSE_RIGHT);
+            break;
+          case 896:
+            Mouse.release(MOUSE_MIDDLE);
+            break;
+          case 897:
+            Mouse.click(MOUSE_MIDDLE);
+            break;
+          case 898:
+            Mouse.press(MOUSE_MIDDLE);
+            break;
+          default:
+            Keyboard.write(inChar);
+            break;
+          }
+      }
+      
+      if ((inChar & 0x400) > 0){
+          Mouse.move(inChar - 0x400, 0);
+          // Mouse.move(10, 0);
+      }
+      if ((inChar & 0x800) > 0){
+          Mouse.move(-1 * (inChar - 0x800), 0);
+          // Mouse.move(-10, 0);
+      }
+      if ((inChar & 0x1000) > 0){
+          Mouse.move(0, inChar - 0x1000);
+          // Mouse.move(0, 10);
+      }
+      if ((inChar & 0x2000) > 0){
+          Mouse.move(0, -1 * (inChar - 0x2000));
+          // Mouse.move(0, -10);
+      }
   }
-/*
-  // use the pushbuttons to control the keyboard:
-  if (digitalRead(upButton) == HIGH) {
-    Keyboard.write('u');
-  }
-  if (digitalRead(downButton) == HIGH) {
-    Keyboard.write('d');
-  }
-  if (digitalRead(leftButton) == HIGH) {
-    Keyboard.write('l');
-  }
-  if (digitalRead(rightButton) == HIGH) {
-    Keyboard.write('r');
-  }
-  if (digitalRead(mouseButton) == HIGH) {
-    Keyboard.write('m');
-  }
-*/
 }
