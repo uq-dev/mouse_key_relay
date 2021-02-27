@@ -24,30 +24,23 @@ namespace MouseKeyRelay
         {
             InitializeComponent();
             serialConnector = new SerialPort();
-            keyboard = new Keyboard();
-            mouse = new Mouse(int.Parse(ConfigurationManager.AppSettings.Get("mouseSpeed")));
+
         }
 
         private void connectCOM()
         {
-            try {
-                debug.Text = "";
-                if (serialConnector.IsOpen)
-                {
-                    serialConnector.Close();
-                }
-                serialConnector.BaudRate = int.Parse(ConfigurationManager.AppSettings.Get("comBaudRate"));
-                serialConnector.Parity = (Parity)int.Parse(ConfigurationManager.AppSettings.Get("comParity"));
-                serialConnector.DataBits = int.Parse(ConfigurationManager.AppSettings.Get("comDataBits"));
-                serialConnector.StopBits = (StopBits)int.Parse(ConfigurationManager.AppSettings.Get("comStopBits"));
-                serialConnector.Handshake = (Handshake)int.Parse(ConfigurationManager.AppSettings.Get("comHandshake"));
-                serialConnector.PortName = ConfigurationManager.AppSettings.Get("comPortName");
-
-                serialConnector.Open();
-
-            } catch (Exception ex) {
-                debug.Text = ex.StackTrace;
+            if (serialConnector.IsOpen)
+            {
+                serialConnector.Close();
             }
+            serialConnector.BaudRate = int.Parse(ConfigurationManager.AppSettings.Get("comBaudRate"));
+            serialConnector.Parity = (Parity)int.Parse(ConfigurationManager.AppSettings.Get("comParity"));
+            serialConnector.DataBits = int.Parse(ConfigurationManager.AppSettings.Get("comDataBits"));
+            serialConnector.StopBits = (StopBits)int.Parse(ConfigurationManager.AppSettings.Get("comStopBits"));
+            serialConnector.Handshake = (Handshake)int.Parse(ConfigurationManager.AppSettings.Get("comHandshake"));
+            serialConnector.PortName = ConfigurationManager.AppSettings.Get("comPortName");
+
+            serialConnector.Open();
         }
 
         private void inputStatus_CheckedChanged(object sender, EventArgs e)
@@ -69,24 +62,35 @@ namespace MouseKeyRelay
         void keyDown(object sender, KeyEventArgs e)
         {
             int key = (int)e.KeyCode;
-
+            int mod = (int)e.Modifiers;
+            /*
             // 入力済みの修飾キーであればスキップ
             if (keyboard.isValidedModifierKeys(key)) {
                 return;
             }
+            */
             // 修飾キーの入力状態を反映
-            shiftStatus.Checked = (((int)e.Modifiers & 0x10000) != 0);
-            ctrlStatus.Checked = (((int)e.Modifiers & 0x20000) != 0);
-            altStatus.Checked = (((int)e.Modifiers & 0x40000) != 0);
+            if ((mod & 0x1000) > 0 || (keyboard.getModifierFromKeys(key) & 0x1000) > 0)
+            {
+                shiftStatus.Checked = true;
+            }
+            if ((mod & 0x2000) > 0 || (keyboard.getModifierFromKeys(key) & 0x2000) > 0)
+            {
+                ctrlStatus.Checked = true;
+            }
+            if ((mod & 0x4000) > 0 || (keyboard.getModifierFromKeys(key) & 0x4000) > 0)
+            {
+                altStatus.Checked = true;
+            }
 
             // 入力キーを転送する
-            int outKey = keyboard.getChar(key, (int)e.Modifiers);
+            int outKey = keyboard.getChar(key);
             if (serialConnector.IsOpen && outKey > 0)
             {
                 serialConnector.Write(outKey+ ";");
             }
 
-            outputKey.Text = (int)e.Modifiers + " : " + key + " : " + e.KeyCode.ToString() + "out : " + outKey;
+            outputKey.Text = mod + " : " + key + " : " + e.KeyCode.ToString() + " out : " + outKey;
             cboxKeyInput.Checked = true;
             inputKey.Text = "";
         }
@@ -94,19 +98,55 @@ namespace MouseKeyRelay
         void keyUp(object sender, KeyEventArgs e)
         {
             int key = (int)e.KeyCode;
-            if (serialConnector.IsOpen &&  keyboard.isValidedModifierKeys(key))
+
+            int outKey = 0;
+            int mod = keyboard.getModifierFromKeys(key);
+            if (mod > 0) {
+                if ((keyboard.getModifierFromKeys(key) & 0x1000) > 0)
+                {
+                    shiftStatus.Checked = false;
+                }
+                if ((keyboard.getModifierFromKeys(key) & 0x2000) > 0)
+                {
+                    ctrlStatus.Checked = false;
+                }
+                if ((keyboard.getModifierFromKeys(key) & 0x4000) > 0)
+                {
+                    altStatus.Checked = false;
+                }
+                outKey = keyboard.getChar((int)e.KeyCode, false) + 3;
+                outputKey.Text = mod + " : " + key;
+            }
+            // PrintScreenキーはkeyUpのタイミングでないとキャッチしないのでここで拾う
+            if (e.KeyCode == Keys.PrintScreen) {
+                outKey = keyboard.getChar((int)e.KeyCode, /*(int)e.Modifiers,*/ false);
+                if (serialConnector.IsOpen)
+                {
+                    serialConnector.Write(outKey + ";");
+                }
+                inputKey.Text = "PrintScreen";
+                outputKey.Text = mod + " : " + key + " : " + e.KeyCode.ToString() + " out : " + outKey;
+            }
+            if (serialConnector.IsOpen && outKey > 0)
             {
-                // 入力状態の修飾キーの押下状態を解除する
-                serialConnector.Write(keyboard.getChar((int)e.KeyCode, (int)e.Modifiers, false) + 3 + ";");
+                serialConnector.Write(outKey + ";");
             }
         }
 
         private void CtrlPanel_Load(object sender, EventArgs e)
         {
-            // シリアル接続
-            connectCOM();
+            try
+            {
+                keyboard = new Keyboard();
+                mouse = new Mouse(int.Parse(ConfigurationManager.AppSettings.Get("mouseSpeed")));
+                // シリアル接続
+                connectCOM();
+            }
+            catch (Exception ex)
+            {
+                debug.Text = ex.StackTrace;
+            }
         }
-
 
         private void mousePanel_MouseClick(object sender, MouseEventArgs e)
         {
@@ -146,23 +186,18 @@ namespace MouseKeyRelay
         {
             int x = e.X;
             int y = e.Y;
-            /*
-            //　パネルからはみ出した場合は前回の位置に補正
-            if (x < 0 || x > mousePanel.Size.Width)
-            {
-                x = _prePoint.Value.X;
-            }
-            if (y < 0 || y > mousePanel.Size.Height)
-            {
-                y = _prePoint.Value.Y;
-            }
-            */
+
             if (serialConnector.IsOpen)
             {
-                string cmd = mouse.mouseMove(new Point(x, y), mousePanel.Size.Width, mousePanel.Size.Height);
-                if (cmd != null)
+                int codeX = 0, codeY = 0;
+                mouse.mouseMove(new Point(x, y), mousePanel.Size.Width, mousePanel.Size.Height, ref codeX, ref codeY);
+                if (codeX > 0)
                 { 
-                    serialConnector.Write(cmd);
+                    serialConnector.Write(codeX + ";");
+                }
+                if (codeY > 0)
+                {
+                    serialConnector.Write(codeY + ";");
                 }
             }
         }
@@ -180,6 +215,7 @@ namespace MouseKeyRelay
 
         private void cboxMouseLeft_CheckedChanged(object sender, EventArgs e)
         {
+
             if (serialConnector.IsOpen)
             {
                 if (cboxMouseLeft.Checked)

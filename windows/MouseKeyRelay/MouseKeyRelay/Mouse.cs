@@ -50,11 +50,11 @@ namespace MouseKeyRelay
             isDraging = false;
             isMoving = false;
         }
-        public string mouseMove(Point point, int panelWidth, int panelHeight)
+        public void mouseMove(Point point, int panelWidth, int panelHeight, ref int codeX, ref int codeY)
         {
             if (!isDraging)
             {
-                return null;
+                return;
             }
             isMoving = true;
 
@@ -69,31 +69,36 @@ namespace MouseKeyRelay
             {
                 y = prePoint.Value.Y;
             }
+            int diffX = prePoint.Value.X - x;
+            int diffY = prePoint.Value.Y - y;
 
-
-            string command = null;
-            int commandCode = 0;
+            //string command = null;
+            //int commandCode = 0;
             // マウス移動距離を計算して転送する
             if (prePoint.Value.X - x < 0)
             {
-                commandCode += 0x400 + Math.Abs(prePoint.Value.X - x) * mouseSpeed;
+                codeX = 0x400 + Math.Abs(diffX) * mouseSpeed;
+                //    commandCode += 0x400 + Math.Abs(prePoint.Value.X - x) * mouseSpeed;
             }
             if (prePoint.Value.X - x > 0)
             {
-                commandCode += 0x800 + Math.Abs(prePoint.Value.X - x) * mouseSpeed;
+                codeX = 0x800 + Math.Abs(diffX) * mouseSpeed;
+                // commandCode += 0x800 + Math.Abs(prePoint.Value.X - x) * mouseSpeed;
             }
             if (prePoint.Value.Y - y < 0)
             {
-                commandCode += 0x1000 + Math.Abs(prePoint.Value.Y - y) * mouseSpeed;
+                codeY = 0x1000 + Math.Abs(diffY) * mouseSpeed;
+                //commandCode += 0x1000 + Math.Abs(prePoint.Value.Y - y) * mouseSpeed;
             }
             if (prePoint.Value.Y -y > 0)
             {
-                commandCode += 0x2000 + Math.Abs(prePoint.Value.Y - y) * mouseSpeed;
+                codeY = 0x2000 + Math.Abs(diffY) * mouseSpeed;
+                //commandCode += 0x2000 + Math.Abs(prePoint.Value.Y - y) * mouseSpeed;
             }
-            command = commandCode + ";";
+            //command = commandCode + ";";
             // 現在位置を更新
             prePoint = point;
-            return command;
+            //return command;
         }
         public int mouseBtnClick(MouseButtons btn) {
             // マウスクリック

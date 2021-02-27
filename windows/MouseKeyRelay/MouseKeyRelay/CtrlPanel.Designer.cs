@@ -109,10 +109,11 @@
             // 
             this.debug.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.debug.Enabled = false;
             this.debug.Location = new System.Drawing.Point(11, 255);
             this.debug.Multiline = true;
             this.debug.Name = "debug";
+            this.debug.ReadOnly = true;
+            this.debug.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.debug.Size = new System.Drawing.Size(218, 49);
             this.debug.TabIndex = 7;
             this.debug.TabStop = false;
