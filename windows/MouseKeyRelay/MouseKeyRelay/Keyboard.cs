@@ -12,26 +12,12 @@ namespace MouseKeyRelay
 {
     class Keyboard
     {
-        private enum modifierKeys {
-            MOD_SHIFT = 16,
-            MOD_CTRL = 17,
-            MOD_ALT = 18
-        };
-        private Dictionary<modifierKeys, int> modifierDic = new Dictionary<modifierKeys, int>()
-        {
-              {modifierKeys.MOD_SHIFT, 0x1000},
-              {modifierKeys.MOD_CTRL, 0x2000},
-              {modifierKeys.MOD_ALT, 0x4000}
-        };
-
         private const string charmappinng = @"keymapping.csv";
         private Dictionary<int, int> keyMappings;
-        private Dictionary<int, int> keyMappingsShift;
         private int modifier;
 
         public Keyboard() {
             this.keyMappings = new Dictionary<int, int>();
-            this.keyMappingsShift = new Dictionary<int, int>();
             this.modifier = 0;
 
             StreamReader sr = new StreamReader(charmappinng);
@@ -60,18 +46,20 @@ namespace MouseKeyRelay
                 }
             }
         }
-        public int getChar(int inKey, bool keyPush = true)
+
+        public int getChar(Keys inKey, bool keyPush = true)
         {
-            int outKey = 0;
-             if (keyMappings.ContainsKey(inKey))
+            int outKey = 0; 
+             if (keyMappings.ContainsKey((int)inKey))
             {
                 // キーマッピング定義が存在する
-                outKey = keyMappings[inKey];
+                outKey = keyMappings[(int)inKey];
             }
 
             // 修飾キーであれば入力状態を更新する
             int mod = getModifierFromKeys(inKey);
-            if (mod > 0) {
+            if (mod > 0)
+            {
                 if (keyPush && !isValidedModifierKeys(inKey))
                 {
                     this.modifier += mod;
@@ -81,35 +69,45 @@ namespace MouseKeyRelay
                     this.modifier -= mod;
                 }
             }
- 
             return outKey;
         }
-        public int getModifierFromKeys(int inKey)
+
+        public int getModifierFromKeys(Keys inKey)
         {
-            if (Enum.IsDefined(typeof(modifierKeys), inKey))
+            switch (inKey)
             {
-                return modifierDic[(modifierKeys)inKey];
+                case Keys.ShiftKey:
+                case Keys.LShiftKey:
+                case Keys.RShiftKey:
+                    return (int)Keys.Shift;
+                case Keys.ControlKey:
+                case Keys.LControlKey:
+                case Keys.RControlKey:
+                    return (int)Keys.Control;
+                case Keys.Menu:
+                case Keys.LMenu:
+                case Keys.RMenu:
+                    return (int)Keys.Alt;
             }
-            else
-            {
-                return 0;
-            }
+            return 0;
         }
-        public bool isValidedModifierKeys(int inKey) {
-            if (((this.modifier & 0x1000) != 0) && inKey == (int)modifierKeys.MOD_SHIFT)
+
+        public bool isValidedModifierKeys(Keys inKey)
+        {
+            switch (inKey)
             {
-                // Shift
-                return true;
-            }
-            if (((this.modifier & 0x2000) != 0) && inKey == (int)modifierKeys.MOD_CTRL)
-            {
-                // Ctrl
-                return true;
-            }
-            if (((this.modifier & 0x4000) != 0) && inKey == (int)modifierKeys.MOD_ALT)
-            {
-                // Alt
-                return true;
+                case Keys.ShiftKey:
+                case Keys.LShiftKey:
+                case Keys.RShiftKey:
+                    return ((this.modifier & (int)Keys.Shift) != 0);
+                case Keys.ControlKey:
+                case Keys.LControlKey:
+                case Keys.RControlKey:
+                    return ((this.modifier & (int)Keys.Control) != 0);
+                case Keys.Menu:
+                case Keys.LMenu:
+                case Keys.RMenu:
+                    return ((this.modifier & (int)Keys.Alt) != 0);
             }
             return false;
         }

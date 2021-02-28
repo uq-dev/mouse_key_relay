@@ -63,28 +63,28 @@ namespace MouseKeyRelay
         {
             int key = (int)e.KeyCode;
             int mod = (int)e.Modifiers;
-            /*
-            // 入力済みの修飾キーであればスキップ
-            if (keyboard.isValidedModifierKeys(key)) {
-                return;
-            }
-            */
-            // 修飾キーの入力状態を反映
-            if ((mod & 0x1000) > 0 || (keyboard.getModifierFromKeys(key) & 0x1000) > 0)
+
+            switch (e.KeyCode)
             {
-                shiftStatus.Checked = true;
-            }
-            if ((mod & 0x2000) > 0 || (keyboard.getModifierFromKeys(key) & 0x2000) > 0)
-            {
-                ctrlStatus.Checked = true;
-            }
-            if ((mod & 0x4000) > 0 || (keyboard.getModifierFromKeys(key) & 0x4000) > 0)
-            {
-                altStatus.Checked = true;
+                case Keys.ShiftKey:
+                case Keys.LShiftKey:
+                case Keys.RShiftKey:
+                    shiftStatus.Checked = true;
+                    break;
+                case Keys.ControlKey:
+                case Keys.LControlKey:
+                case Keys.RControlKey:
+                    ctrlStatus.Checked = true;
+                    break;
+                case Keys.Menu:
+                case Keys.LMenu:
+                case Keys.RMenu:
+                    altStatus.Checked = true;
+                    break;
             }
 
             // 入力キーを転送する
-            int outKey = keyboard.getChar(key);
+            int outKey = keyboard.getChar(e.KeyCode);
             if (serialConnector.IsOpen && outKey > 0)
             {
                 serialConnector.Write(outKey+ ";");
@@ -97,34 +97,41 @@ namespace MouseKeyRelay
 
         void keyUp(object sender, KeyEventArgs e)
         {
+            switch (e.KeyCode) {
+                case Keys.ShiftKey:
+                case Keys.LShiftKey:
+                case Keys.RShiftKey:
+                    shiftStatus.Checked = false;
+                    break;
+                case Keys.ControlKey:
+                case Keys.LControlKey:
+                case Keys.RControlKey:
+                    ctrlStatus.Checked = false;
+                    break;
+                case Keys.Menu:
+                case Keys.LMenu:
+                case Keys.RMenu:
+                    altStatus.Checked = false;
+                    break;
+            }
             int key = (int)e.KeyCode;
 
             int outKey = 0;
-            int mod = keyboard.getModifierFromKeys(key);
+
+            int mod = keyboard.getModifierFromKeys(e.KeyCode);
             if (mod > 0) {
-                if ((keyboard.getModifierFromKeys(key) & 0x1000) > 0)
-                {
-                    shiftStatus.Checked = false;
-                }
-                if ((keyboard.getModifierFromKeys(key) & 0x2000) > 0)
-                {
-                    ctrlStatus.Checked = false;
-                }
-                if ((keyboard.getModifierFromKeys(key) & 0x4000) > 0)
-                {
-                    altStatus.Checked = false;
-                }
-                outKey = keyboard.getChar((int)e.KeyCode, false) + 3;
+                outKey = keyboard.getChar(e.KeyCode, false) + 3;
                 outputKey.Text = mod + " : " + key;
             }
+
             // PrintScreenキーはkeyUpのタイミングでないとキャッチしないのでここで拾う
             if (e.KeyCode == Keys.PrintScreen) {
-                outKey = keyboard.getChar((int)e.KeyCode, /*(int)e.Modifiers,*/ false);
+                outKey = keyboard.getChar(e.KeyCode, false);
                 if (serialConnector.IsOpen)
                 {
                     serialConnector.Write(outKey + ";");
                 }
-                inputKey.Text = "PrintScreen";
+                inputKey.Text = e.KeyCode.ToString();
                 outputKey.Text = mod + " : " + key + " : " + e.KeyCode.ToString() + " out : " + outKey;
             }
             if (serialConnector.IsOpen && outKey > 0)
