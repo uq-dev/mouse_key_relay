@@ -19,14 +19,18 @@ namespace MouseKeyRelay
         private Keyboard keyboard;
         private Mouse mouse;
 
-
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public CtrlPanel()
         {
             InitializeComponent();
             serialConnector = new SerialPort();
-
         }
 
+        /// <summary>
+        /// COM接続。パラメータはapp.configから読み込む。
+        /// </summary>
         private void connectCOM()
         {
             if (serialConnector.IsOpen)
@@ -43,6 +47,10 @@ namespace MouseKeyRelay
             serialConnector.Open();
         }
 
+        /// <summary>
+        /// キー入力受付の開始/終了
+        /// チェックをオンにするとキー入力をリレーする。
+        /// </summary>
         private void inputStatus_CheckedChanged(object sender, EventArgs e)
         {
             if (cboxKeyInput.Checked)
@@ -59,11 +67,12 @@ namespace MouseKeyRelay
             }
         }
 
+        /// <summary>
+        /// キーボードのキーダウン
+        /// </summary>
         void keyDown(object sender, KeyEventArgs e)
         {
-            int key = (int)e.KeyCode;
-            int mod = (int)e.Modifiers;
-
+            // 修飾キーの入力状態を反映する
             switch (e.KeyCode)
             {
                 case Keys.ShiftKey:
@@ -83,18 +92,23 @@ namespace MouseKeyRelay
                     break;
             }
 
-            // 入力キーを転送する
+            // 転送キーを取得
             int outKey = keyboard.getChar(e.KeyCode);
             if (serialConnector.IsOpen && outKey > 0)
             {
                 serialConnector.Write(outKey+ ";");
             }
 
+            int key = (int)e.KeyCode;
+            int mod = (int)e.Modifiers;
+
             outputKey.Text = mod + " : " + key + " : " + e.KeyCode.ToString() + " out : " + outKey;
             cboxKeyInput.Checked = true;
             inputKey.Text = "";
         }
-
+        /// <summary>
+        /// キーボードのキーアップ
+        /// </summary>
         void keyUp(object sender, KeyEventArgs e)
         {
             switch (e.KeyCode) {
@@ -139,7 +153,9 @@ namespace MouseKeyRelay
                 serialConnector.Write(outKey + ";");
             }
         }
-
+        /// <summary>
+        /// フォームの初期化
+        /// </summary>
         private void CtrlPanel_Load(object sender, EventArgs e)
         {
             try
@@ -151,10 +167,12 @@ namespace MouseKeyRelay
             }
             catch (Exception ex)
             {
-                debug.Text = ex.StackTrace;
+                debug.Text = ex.Message;
             }
         }
-
+        /// <summary>
+        /// マウスクリック
+        /// </summary>
         private void mousePanel_MouseClick(object sender, MouseEventArgs e)
         {
             if (serialConnector.IsOpen) {
@@ -164,7 +182,9 @@ namespace MouseKeyRelay
                 }
             }
         }
-
+        /// <summary>
+        /// マウスダブルクリック
+        /// </summary>
         private void mousePanel_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (serialConnector.IsOpen)
@@ -177,7 +197,9 @@ namespace MouseKeyRelay
                 }
             }
         }
-
+        /// <summary>
+        /// マウスボタンダウン
+        /// </summary>
         private void mousePanel_MouseDown(object sender, MouseEventArgs e)
         {
             if (serialConnector.IsOpen)
@@ -191,7 +213,9 @@ namespace MouseKeyRelay
                 mouse.mouseDown(e.Location);
             }
         }
-
+        /// <summary>
+        /// マウス移動
+        /// </summary>
         private void mousePanel_MouseMove(object sender, MouseEventArgs e)
         {
             if (serialConnector.IsOpen)
@@ -211,7 +235,9 @@ namespace MouseKeyRelay
                 }
             }
         }
-
+        /// <summary>
+        /// マウスボタンアップ
+        /// </summary>
         private void mousePanel_MouseUp(object sender, MouseEventArgs e)
         {
             if (serialConnector.IsOpen)
@@ -225,7 +251,9 @@ namespace MouseKeyRelay
                 mouse.mouseUp();
             }
         }
-
+        /// <summary>
+        /// マウス左ボタン
+        /// </summary>
         private void cboxMouseLeft_CheckedChanged(object sender, EventArgs e)
         {
 
@@ -242,7 +270,9 @@ namespace MouseKeyRelay
                 
             }
         }
-
+        /// <summary>
+        /// マウス右ボタン
+        /// </summary>
         private void cboxMouseRight_CheckedChanged(object sender, EventArgs e)
         {
             if (serialConnector.IsOpen)
