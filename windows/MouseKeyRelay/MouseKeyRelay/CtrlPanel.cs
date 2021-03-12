@@ -180,22 +180,25 @@ namespace MouseKeyRelay
 
         private void mousePanel_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left)
+            if (serialConnector.IsOpen)
             {
-                return;
-            }
-            Cursor.Current = Cursors.Hand;
+                if (e.Button != MouseButtons.Left)
+                {
+                    return;
+                }
+                Cursor.Current = Cursors.Hand;
 
-            mouse.mouseDown(e.Location);
+                mouse.mouseDown(e.Location);
+            }
         }
 
         private void mousePanel_MouseMove(object sender, MouseEventArgs e)
         {
-            int x = e.X;
-            int y = e.Y;
-
             if (serialConnector.IsOpen)
             {
+                int x = e.X;
+                int y = e.Y;
+
                 int codeX = 0, codeY = 0;
                 mouse.mouseMove(new Point(x, y), mousePanel.Size.Width, mousePanel.Size.Height, ref codeX, ref codeY);
                 if (codeX > 0)
@@ -211,13 +214,16 @@ namespace MouseKeyRelay
 
         private void mousePanel_MouseUp(object sender, MouseEventArgs e)
         {
-            Cursor.Current = Cursors.Default;
-
-            if (e.Button != MouseButtons.Left)
+            if (serialConnector.IsOpen)
             {
-                return;
+                Cursor.Current = Cursors.Default;
+
+                if (e.Button != MouseButtons.Left)
+                {
+                    return;
+                }
+                mouse.mouseUp();
             }
-            mouse.mouseUp();
         }
 
         private void cboxMouseLeft_CheckedChanged(object sender, EventArgs e)
