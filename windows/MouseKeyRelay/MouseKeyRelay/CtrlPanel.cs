@@ -27,7 +27,23 @@ namespace MouseKeyRelay
             InitializeComponent();
             serialConnector = new SerialPort();
         }
-
+        /// <summary>
+        /// フォームの初期化
+        /// </summary>
+        private void CtrlPanel_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                keyboard = new Keyboard();
+                mouse = new Mouse(int.Parse(ConfigurationManager.AppSettings.Get("mouseSpeed")));
+                // シリアル接続
+                connectCOM();
+            }
+            catch (Exception ex)
+            {
+                debug.Text = ex.Message;
+            }
+        }
         /// <summary>
         /// COM接続。パラメータはapp.configから読み込む。
         /// </summary>
@@ -58,11 +74,13 @@ namespace MouseKeyRelay
                 KeyDown += new KeyEventHandler(keyDown);
                 KeyUp += new KeyEventHandler(keyUp);
                 inputKey.Text = "please input";
+                this.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.mousePanel_MouseWheel);
             }
             else
             {
                 KeyDown -= new KeyEventHandler(keyDown);
                 KeyUp -= new KeyEventHandler(keyUp);
+                this.MouseWheel -= new System.Windows.Forms.MouseEventHandler(this.mousePanel_MouseWheel);
                 inputKey.Text = "";
             }
         }
@@ -153,23 +171,7 @@ namespace MouseKeyRelay
                 serialConnector.Write(outKey + ";");
             }
         }
-        /// <summary>
-        /// フォームの初期化
-        /// </summary>
-        private void CtrlPanel_Load(object sender, EventArgs e)
-        {
-            try
-            {
-                keyboard = new Keyboard();
-                mouse = new Mouse(int.Parse(ConfigurationManager.AppSettings.Get("mouseSpeed")));
-                // シリアル接続
-                connectCOM();
-            }
-            catch (Exception ex)
-            {
-                debug.Text = ex.Message;
-            }
-        }
+
         /// <summary>
         /// マウスクリック
         /// </summary>
@@ -198,7 +200,7 @@ namespace MouseKeyRelay
             }
         }
         /// <summary>
-        /// マウスボタンダウン
+        /// トラックパッド領域でのマウスボタンダウン
         /// </summary>
         private void mousePanel_MouseDown(object sender, MouseEventArgs e)
         {
@@ -214,17 +216,14 @@ namespace MouseKeyRelay
             }
         }
         /// <summary>
-        /// マウス移動
+        /// トラックパッド領域でのマウス移動
         /// </summary>
         private void mousePanel_MouseMove(object sender, MouseEventArgs e)
         {
             if (serialConnector.IsOpen)
             {
-                int x = e.X;
-                int y = e.Y;
-
                 int codeX = 0, codeY = 0;
-                mouse.mouseMove(new Point(x, y), mousePanel.Size.Width, mousePanel.Size.Height, ref codeX, ref codeY);
+                mouse.mouseMove(new Point(e.X, e.Y), mousePanel.Size.Width, mousePanel.Size.Height, ref codeX, ref codeY);
                 if (codeX > 0)
                 { 
                     serialConnector.Write(codeX + ";");
@@ -236,7 +235,7 @@ namespace MouseKeyRelay
             }
         }
         /// <summary>
-        /// マウスボタンアップ
+        /// トラックパッド領域でのマウスボタンアップ
         /// </summary>
         private void mousePanel_MouseUp(object sender, MouseEventArgs e)
         {
@@ -285,6 +284,34 @@ namespace MouseKeyRelay
                 {
                     serialConnector.Write(mouse.mouseBtnRelease(MouseButtons.Right) + ";");
                 }
+            }
+        }
+        /// <summary>
+        /// マウス中央ボタン
+        /// </summary>
+        private void cboxMouseMid_CheckedChanged(object sender, EventArgs e)
+        {
+            if (serialConnector.IsOpen)
+            {
+                if (cboxMouseMid.Checked)
+                {
+                    serialConnector.Write(mouse.mouseBtnPush(MouseButtons.Middle) + ";");
+                }
+                else
+                {
+                    serialConnector.Write(mouse.mouseBtnRelease(MouseButtons.Middle) + ";");
+                }
+            }
+        }
+        /// <summary>
+        /// マウスホイールイベント
+        /// </summary>
+        private void mousePanel_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (serialConnector.IsOpen)
+            {
+                serialConnector.Write(mouse.mouseWheel(e.Delta) + ";");
+                outputKey.Text = "" + mouse.mouseWheel(e.Delta);
             }
         }
     }

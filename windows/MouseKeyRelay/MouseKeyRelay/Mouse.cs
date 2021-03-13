@@ -19,21 +19,21 @@ namespace MouseKeyRelay
 
         private Dictionary<MouseButtons, int> btnCmdDicRelease = new Dictionary<MouseButtons, int>()
             {
-              {MouseButtons.Left, 0x280},
-              {MouseButtons.Right, 0x300},
-              {MouseButtons.Middle, 0x380}
+              {MouseButtons.Left, 0x200},
+              {MouseButtons.Right, 0x220},
+              {MouseButtons.Middle, 0x240}
             };
         private Dictionary<MouseButtons, int> btnCmdDicClick = new Dictionary<MouseButtons, int>()
             {
-              {MouseButtons.Left, 0x281},
-              {MouseButtons.Right, 0x301},
-              {MouseButtons.Middle, 0x381}
+              {MouseButtons.Left, 0x201},
+              {MouseButtons.Right, 0x221},
+              {MouseButtons.Middle, 0x241}
             };
         private Dictionary<MouseButtons, int> btnCmdDicPush = new Dictionary<MouseButtons, int>()
             {
-              {MouseButtons.Left, 0x282},
-              {MouseButtons.Right, 0x302},
-              {MouseButtons.Middle, 0x382}
+              {MouseButtons.Left, 0x202},
+              {MouseButtons.Right, 0x222},
+              {MouseButtons.Middle, 0x242}
             };
 
         public Mouse(int mouseSpeed) {
@@ -72,33 +72,26 @@ namespace MouseKeyRelay
             int diffX = prePoint.Value.X - x;
             int diffY = prePoint.Value.Y - y;
 
-            //string command = null;
-            //int commandCode = 0;
             // マウス移動距離を計算して転送する
             if (prePoint.Value.X - x < 0)
             {
                 codeX = 0x400 + Math.Abs(diffX) * mouseSpeed;
-                //    commandCode += 0x400 + Math.Abs(prePoint.Value.X - x) * mouseSpeed;
             }
             if (prePoint.Value.X - x > 0)
             {
-                codeX = 0x800 + Math.Abs(diffX) * mouseSpeed;
-                // commandCode += 0x800 + Math.Abs(prePoint.Value.X - x) * mouseSpeed;
+                codeX = 0x500 + Math.Abs(diffX) * mouseSpeed;
             }
             if (prePoint.Value.Y - y < 0)
             {
-                codeY = 0x1000 + Math.Abs(diffY) * mouseSpeed;
-                //commandCode += 0x1000 + Math.Abs(prePoint.Value.Y - y) * mouseSpeed;
+                codeY = 0x600 + Math.Abs(diffY) * mouseSpeed;
             }
             if (prePoint.Value.Y -y > 0)
             {
-                codeY = 0x2000 + Math.Abs(diffY) * mouseSpeed;
-                //commandCode += 0x2000 + Math.Abs(prePoint.Value.Y - y) * mouseSpeed;
+                codeY = 0x700 + Math.Abs(diffY) * mouseSpeed;
             }
-            //command = commandCode + ";";
+
             // 現在位置を更新
             prePoint = point;
-            //return command;
         }
         public int mouseBtnClick(MouseButtons btn) {
             // マウスクリック
@@ -123,6 +116,19 @@ namespace MouseKeyRelay
                 return 0;
             }
             return btnCmdDicRelease[btn];
+        }
+        public int mouseWheel(int delta)
+        {
+            int result = 0;
+            if (delta > 0)
+            {
+                result = 0x260 + (Math.Abs(delta) * SystemInformation.MouseWheelScrollLines / 120);
+            }
+            if (delta < 0)
+            {
+                result = 0x270 + (Math.Abs(delta) * SystemInformation.MouseWheelScrollLines / 120);
+            }
+            return result;
         }
     }
 }
