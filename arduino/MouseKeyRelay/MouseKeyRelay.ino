@@ -48,67 +48,63 @@ void loop() {
       String inString = mySerial.readStringUntil(';');
       // mySerial.writeString(inChar);
       int inChar = inString.toInt();
-      Serial.println(inString);
-      if (inChar < 0x400){
+      // Serial.println(inString);
+      if (inChar < 0x260){
         switch (inChar){
           case 128:
           case 129:
           case 130:
             Keyboard.press(inChar);
-            break;
+            return;
           case 131:
           case 132:
           case 133:
             Keyboard.release(inChar - 3);
-            break;
-          case 640:
+            return;
+          case 512:
             Mouse.release(MOUSE_LEFT);
-            break;
-          case 641:
+            return;
+          case 513:
             Mouse.click(MOUSE_LEFT);
-            break;
-          case 642:
+            return;
+          case 514:
             Mouse.press(MOUSE_LEFT);
-            break;
-          case 768:
+            return;
+          case 544:
             Mouse.release(MOUSE_RIGHT);
-            break;
-          case 769:
+            return;
+          case 545:
             Mouse.click(MOUSE_RIGHT);
-            break;
-          case 770:
+            return;
+          case 546:
             Mouse.press(MOUSE_RIGHT);
-            break;
-          case 896:
+            return;
+          case 576:
             Mouse.release(MOUSE_MIDDLE);
-            break;
-          case 897:
+            return;
+          case 577:
             Mouse.click(MOUSE_MIDDLE);
-            break;
-          case 898:
+            return;
+          case 578:
             Mouse.press(MOUSE_MIDDLE);
-            break;
+            return;
           default:
             Keyboard.write(inChar);
-            break;
+            return;
           }
+      } else if (inChar < 0x270) {
+          Mouse.move(0, 0, inChar - 0x260);
+      } else if (inChar < 0x400){
+          Mouse.move(0, 0, -1 * (inChar - 0x270));
+      } else if (inChar < 0x500) {
+            Mouse.move(inChar - 0x400, 0);
+      } else if (inChar < 0x600){
+            Mouse.move(-1 * (inChar - 0x500), 0);
+      } else if (inChar < 0x700){
+            Mouse.move(0, inChar - 0x600);
+      } else if (inChar < 0x800){
+            Mouse.move(0, -1 * (inChar - 0x700));
       }
-      
-      if ((inChar & 0x400) > 0){
-          Mouse.move(inChar - 0x400, 0);
-          // Mouse.move(10, 0);
-      }
-      if ((inChar & 0x800) > 0){
-          Mouse.move(-1 * (inChar - 0x800), 0);
-          // Mouse.move(-10, 0);
-      }
-      if ((inChar & 0x1000) > 0){
-          Mouse.move(0, inChar - 0x1000);
-          // Mouse.move(0, 10);
-      }
-      if ((inChar & 0x2000) > 0){
-          Mouse.move(0, -1 * (inChar - 0x2000));
-          // Mouse.move(0, -10);
-      }
+      delay(1);
   }
 }
