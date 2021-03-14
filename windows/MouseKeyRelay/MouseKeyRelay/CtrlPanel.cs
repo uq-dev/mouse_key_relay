@@ -122,7 +122,7 @@ namespace MouseKeyRelay
 
             outputKey.Text = mod + " : " + key + " : " + e.KeyCode.ToString() + " out : " + outKey;
             cboxKeyInput.Checked = true;
-            inputKey.Text = "";
+            // inputKey.Text = "";
         }
         /// <summary>
         /// キーボードのキーアップ
@@ -147,29 +147,19 @@ namespace MouseKeyRelay
                     break;
             }
             int key = (int)e.KeyCode;
-
-            int outKey = 0;
-
-            int mod = keyboard.getModifierFromKeys(e.KeyCode);
-            if (mod > 0) {
-                outKey = keyboard.getChar(e.KeyCode, false) + 3;
-                outputKey.Text = mod + " : " + key;
-            }
-
-            // PrintScreenキーはkeyUpのタイミングでないとキャッチしないのでここで拾う
-            if (e.KeyCode == Keys.PrintScreen) {
-                outKey = keyboard.getChar(e.KeyCode, false);
-                if (serialConnector.IsOpen)
+            
+            // 転送キーを取得
+            int outKey = keyboard.getChar(e.KeyCode);
+            if (serialConnector.IsOpen && outKey > 0)
+            {
+                // PrintScreenキーはkeyUpのタイミングでないとキャッチしないので入力もここで行う
+                if (e.KeyCode == Keys.PrintScreen)
                 {
                     serialConnector.Write(outKey + ";");
                 }
-                inputKey.Text = e.KeyCode.ToString();
-                outputKey.Text = mod + " : " + key + " : " + e.KeyCode.ToString() + " out : " + outKey;
+                serialConnector.Write(outKey + 0x200 + ";");
             }
-            if (serialConnector.IsOpen && outKey > 0)
-            {
-                serialConnector.Write(outKey + ";");
-            }
+            outputKey.Text = (int)e.Modifiers + " : " + key + " : " + e.KeyCode.ToString() + " out : " + outKey;
         }
 
         /// <summary>
@@ -311,7 +301,7 @@ namespace MouseKeyRelay
             if (serialConnector.IsOpen)
             {
                 serialConnector.Write(mouse.mouseWheel(e.Delta) + ";");
-                outputKey.Text = "" + mouse.mouseWheel(e.Delta);
+                //outputKey.Text = "" + mouse.mouseWheel(e.Delta);
             }
         }
     }

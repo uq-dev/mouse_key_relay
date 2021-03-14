@@ -19,21 +19,21 @@ namespace MouseKeyRelay
 
         private Dictionary<MouseButtons, int> btnCmdDicRelease = new Dictionary<MouseButtons, int>()
             {
-              {MouseButtons.Left, 0x200},
-              {MouseButtons.Right, 0x220},
-              {MouseButtons.Middle, 0x240}
+              {MouseButtons.Left, 0x400},
+              {MouseButtons.Right, 0x420},
+              {MouseButtons.Middle, 0x440}
             };
         private Dictionary<MouseButtons, int> btnCmdDicClick = new Dictionary<MouseButtons, int>()
             {
-              {MouseButtons.Left, 0x201},
-              {MouseButtons.Right, 0x221},
-              {MouseButtons.Middle, 0x241}
+              {MouseButtons.Left, 0x401},
+              {MouseButtons.Right, 0x421},
+              {MouseButtons.Middle, 0x441}
             };
         private Dictionary<MouseButtons, int> btnCmdDicPush = new Dictionary<MouseButtons, int>()
             {
-              {MouseButtons.Left, 0x202},
-              {MouseButtons.Right, 0x222},
-              {MouseButtons.Middle, 0x242}
+              {MouseButtons.Left, 0x402},
+              {MouseButtons.Right, 0x422},
+              {MouseButtons.Middle, 0x442}
             };
 
         public Mouse(int mouseSpeed) {
@@ -75,19 +75,19 @@ namespace MouseKeyRelay
             // マウス移動距離を計算して転送する
             if (prePoint.Value.X - x < 0)
             {
-                codeX = 0x400 + Math.Abs(diffX) * mouseSpeed;
+                codeX = 0x600 + Math.Abs(diffX) * mouseSpeed;
             }
             if (prePoint.Value.X - x > 0)
             {
-                codeX = 0x500 + Math.Abs(diffX) * mouseSpeed;
+                codeX = 0x680 + Math.Abs(diffX) * mouseSpeed;
             }
             if (prePoint.Value.Y - y < 0)
             {
-                codeY = 0x600 + Math.Abs(diffY) * mouseSpeed;
+                codeY = 0x700 + Math.Abs(diffY) * mouseSpeed;
             }
             if (prePoint.Value.Y -y > 0)
             {
-                codeY = 0x700 + Math.Abs(diffY) * mouseSpeed;
+                codeY = 0x780 + Math.Abs(diffY) * mouseSpeed;
             }
 
             // 現在位置を更新
@@ -122,11 +122,11 @@ namespace MouseKeyRelay
             int result = 0;
             if (delta > 0)
             {
-                result = 0x260 + (Math.Abs(delta) * SystemInformation.MouseWheelScrollLines / 120);
+                result = 0x460 + (Math.Abs(delta) * SystemInformation.MouseWheelScrollLines / 120);
             }
             if (delta < 0)
             {
-                result = 0x270 + (Math.Abs(delta) * SystemInformation.MouseWheelScrollLines / 120);
+                result = 0x470 + (Math.Abs(delta) * SystemInformation.MouseWheelScrollLines / 120);
             }
             return result;
         }
