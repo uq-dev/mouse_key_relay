@@ -105,6 +105,7 @@
             this.outputKey.Name = "outputKey";
             this.outputKey.Size = new System.Drawing.Size(218, 19);
             this.outputKey.TabIndex = 5;
+            this.outputKey.TabStop = false;
             // 
             // debug
             // 
@@ -143,6 +144,7 @@
             this.cboxMouseLeft.Name = "cboxMouseLeft";
             this.cboxMouseLeft.Size = new System.Drawing.Size(105, 16);
             this.cboxMouseLeft.TabIndex = 11;
+            this.cboxMouseLeft.TabStop = false;
             this.cboxMouseLeft.Text = "MouseLeftDown";
             this.cboxMouseLeft.UseVisualStyleBackColor = true;
             this.cboxMouseLeft.CheckedChanged += new System.EventHandler(this.cboxMouseLeft_CheckedChanged);
@@ -154,6 +156,7 @@
             this.cboxMouseRight.Name = "cboxMouseRight";
             this.cboxMouseRight.Size = new System.Drawing.Size(112, 16);
             this.cboxMouseRight.TabIndex = 12;
+            this.cboxMouseRight.TabStop = false;
             this.cboxMouseRight.Text = "MouseRightDown";
             this.cboxMouseRight.UseVisualStyleBackColor = true;
             this.cboxMouseRight.CheckedChanged += new System.EventHandler(this.cboxMouseRight_CheckedChanged);
@@ -165,6 +168,7 @@
             this.cboxMouseMid.Name = "cboxMouseMid";
             this.cboxMouseMid.Size = new System.Drawing.Size(103, 16);
             this.cboxMouseMid.TabIndex = 13;
+            this.cboxMouseMid.TabStop = false;
             this.cboxMouseMid.Text = "MouseMidDown";
             this.cboxMouseMid.UseVisualStyleBackColor = true;
             this.cboxMouseMid.CheckedChanged += new System.EventHandler(this.cboxMouseMid_CheckedChanged);
