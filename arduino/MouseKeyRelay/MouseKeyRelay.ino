@@ -45,66 +45,64 @@ void setup() { // initialize the buttons' inputs:
 void loop() {
   // use serial input to control the mouse:
   if(mySerial.available() > 0) {
-      String inString = mySerial.readStringUntil(';');
-      // mySerial.writeString(inChar);
-      int inChar = inString.toInt();
-      // Serial.println(inString);
-      if (inChar < 0x260){
-        switch (inChar){
-          case 128:
-          case 129:
-          case 130:
-            Keyboard.press(inChar);
-            return;
-          case 131:
-          case 132:
-          case 133:
-            Keyboard.release(inChar - 3);
-            return;
-          case 512:
-            Mouse.release(MOUSE_LEFT);
-            return;
-          case 513:
-            Mouse.click(MOUSE_LEFT);
-            return;
-          case 514:
-            Mouse.press(MOUSE_LEFT);
-            return;
-          case 544:
-            Mouse.release(MOUSE_RIGHT);
-            return;
-          case 545:
-            Mouse.click(MOUSE_RIGHT);
-            return;
-          case 546:
-            Mouse.press(MOUSE_RIGHT);
-            return;
-          case 576:
-            Mouse.release(MOUSE_MIDDLE);
-            return;
-          case 577:
-            Mouse.click(MOUSE_MIDDLE);
-            return;
-          case 578:
-            Mouse.press(MOUSE_MIDDLE);
-            return;
-          default:
-            Keyboard.write(inChar);
-            return;
-          }
-      } else if (inChar < 0x270) {
-          Mouse.move(0, 0, inChar - 0x260);
-      } else if (inChar < 0x400){
-          Mouse.move(0, 0, -1 * (inChar - 0x270));
-      } else if (inChar < 0x500) {
-            Mouse.move(inChar - 0x400, 0);
-      } else if (inChar < 0x600){
-            Mouse.move(-1 * (inChar - 0x500), 0);
-      } else if (inChar < 0x700){
-            Mouse.move(0, inChar - 0x600);
-      } else if (inChar < 0x800){
-            Mouse.move(0, -1 * (inChar - 0x700));
-      }
-      delay(1);
+    String inString = mySerial.readStringUntil(';');
+    // mySerial.writeString(inChar);
+    int inChar = inString.toInt();
+
+    if (inChar < 0x200){
+      // キーダウン
+      Keyboard.press(inChar);
+      return;
+    } else if (inChar < 0x400){
+      // キーアップ
+      Keyboard.release(inChar - 0x200);
+      return;          
+    } else if (inChar < 0x460){
+      // マウスボタン
+      switch (inChar){
+        case 0x400:
+          Mouse.release(MOUSE_LEFT);
+          return;
+        case 0x401:
+          Mouse.click(MOUSE_LEFT);
+          return;
+        case 0x402:
+          Mouse.press(MOUSE_LEFT);
+          return;
+        case 0x420:
+          Mouse.release(MOUSE_RIGHT);
+          return;
+        case 0x421:
+          Mouse.click(MOUSE_RIGHT);
+          return;
+        case 0x422:
+          Mouse.press(MOUSE_RIGHT);
+          return;
+        case 0x440:
+          Mouse.release(MOUSE_MIDDLE);
+          return;
+        case 0x441:
+          Mouse.click(MOUSE_MIDDLE);
+          return;
+        case 0x442:
+          Mouse.press(MOUSE_MIDDLE);
+          return;
+        }
+    } else if (inChar < 0x470) {
+      // マウスホイール 上
+      Mouse.move(0, 0, inChar - 0x460);
+    } else if (inChar < 0x600){
+      // マウスホイール 下
+      Mouse.move(0, 0, -1 * (inChar - 0x470));
+    } else if (inChar < 0x680) {
+      Mouse.move(inChar - 0x600, 0);
+    } else if (inChar < 0x700){
+      Mouse.move(-1 * (inChar - 0x680), 0);
+    } else if (inChar < 0x780){
+      Mouse.move(0, inChar - 0x700);
+    } else if (inChar < 0x800){
+      Mouse.move(0, -1 * (inChar - 0x780));
+    }
+    delay(1);
   }
 }
