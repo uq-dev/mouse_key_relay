@@ -40,6 +40,9 @@ void setup() { // initialize the buttons' inputs:
   */
   mySerial.begin(9600);
   Keyboard.releaseAll();
+  Mouse.release(MOUSE_LEFT);
+  Mouse.release(MOUSE_RIGHT);
+  Mouse.release(MOUSE_MIDDLE);
 }
 
 void loop() {
@@ -49,7 +52,12 @@ void loop() {
     // mySerial.writeString(inChar);
     int inChar = inString.toInt();
 
-    if (inChar < 0x200){
+    if (inChar == 0){
+      Keyboard.releaseAll();
+      Mouse.release(MOUSE_LEFT);
+      Mouse.release(MOUSE_RIGHT);
+      Mouse.release(MOUSE_MIDDLE);
+    } else if (inChar < 0x200){
       // キーダウン
       Keyboard.press(inChar);
       return;
