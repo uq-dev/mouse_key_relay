@@ -90,78 +90,58 @@ namespace MouseKeyRelay
         /// </summary>
         void keyDown(object sender, KeyEventArgs e)
         {
-            // 修飾キーの入力状態を反映する
-            switch (e.KeyCode)
-            {
-                case Keys.ShiftKey:
-                case Keys.LShiftKey:
-                case Keys.RShiftKey:
-                    shiftStatus.Checked = true;
-                    break;
-                case Keys.ControlKey:
-                case Keys.LControlKey:
-                case Keys.RControlKey:
-                    ctrlStatus.Checked = true;
-                    break;
-                case Keys.Menu:
-                case Keys.LMenu:
-                case Keys.RMenu:
-                    altStatus.Checked = true;
-                    break;
-            }
-
-            // 転送キーを取得
-            int outKey = keyboard.getChar(e.KeyCode);
-            if (serialConnector.IsOpen && outKey > 0)
-            {
-                serialConnector.Write(outKey+ ";");
-            }
-
-            int key = (int)e.KeyCode;
-            int mod = (int)e.Modifiers;
-
-            outputKey.Text = mod + " : " + key + " : " + e.KeyCode.ToString() + " out : " + outKey;
-            cboxKeyInput.Checked = true;
-            // inputKey.Text = "";
+            keyInput(e.KeyCode, true);
         }
         /// <summary>
         /// キーボードのキーアップ
         /// </summary>
         void keyUp(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode) {
+            keyInput(e.KeyCode, false);
+        }
+        private void keyInput(Keys key, bool pushed) {
+            // 修飾キーの入力状態を反映する
+            switch (key)
+            {
                 case Keys.ShiftKey:
                 case Keys.LShiftKey:
                 case Keys.RShiftKey:
-                    shiftStatus.Checked = false;
+                    shiftStatus.Checked = pushed;
                     break;
                 case Keys.ControlKey:
                 case Keys.LControlKey:
                 case Keys.RControlKey:
-                    ctrlStatus.Checked = false;
+                    ctrlStatus.Checked = pushed;
                     break;
                 case Keys.Menu:
                 case Keys.LMenu:
                 case Keys.RMenu:
-                    altStatus.Checked = false;
+                    altStatus.Checked = pushed;
                     break;
             }
-            int key = (int)e.KeyCode;
-            
             // 転送キーを取得
-            int outKey = keyboard.getChar(e.KeyCode);
+            int outKey = keyboard.getChar(key);
             if (serialConnector.IsOpen && outKey > 0)
             {
-                // PrintScreenキーはkeyUpのタイミングでないとキャッチしないので入力もここで行う
-                if (e.KeyCode == Keys.PrintScreen)
+                if (pushed)
                 {
+                    // キーダウン
                     serialConnector.Write(outKey + ";");
+                    outputKey.Text = (int)key + " : " + key.ToString() + " out : " + outKey;
+                    cboxKeyInput.Checked = true;
+                    inputKey.Text = "";
+                } else {
+                    // キーアップ
+                    // PrintScreenキーはkeyUpのタイミングでないとキャッチしないので入力もここで行う
+                    if (key == Keys.PrintScreen)
+                    {
+                        serialConnector.Write(outKey + ";");
+                        outputKey.Text = (int)key + " : " + key.ToString() + " out : " + outKey;
+                    }
+                    serialConnector.Write(outKey + 0x200 + ";");
                 }
-                serialConnector.Write(outKey + 0x200 + ";");
             }
-            outputKey.Text = (int)e.Modifiers + " : " + key + " : " + e.KeyCode.ToString() + " out : " + outKey;
         }
-
         /// <summary>
         /// マウスクリック
         /// </summary>
