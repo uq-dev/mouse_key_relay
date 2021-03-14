@@ -61,6 +61,10 @@ namespace MouseKeyRelay
             serialConnector.PortName = ConfigurationManager.AppSettings.Get("comPortName");
 
             serialConnector.Open();
+            if (serialConnector.IsOpen)
+            {
+                serialConnector.Write("0;");
+            }
         }
 
         /// <summary>
