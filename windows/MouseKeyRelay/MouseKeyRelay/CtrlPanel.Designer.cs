@@ -39,6 +39,9 @@
             this.cboxMouseLeft = new System.Windows.Forms.CheckBox();
             this.cboxMouseRight = new System.Windows.Forms.CheckBox();
             this.cboxMouseMid = new System.Windows.Forms.CheckBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // cboxKeyInput
@@ -111,7 +114,7 @@
             // 
             this.debug.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.debug.Location = new System.Drawing.Point(11, 286);
+            this.debug.Location = new System.Drawing.Point(11, 440);
             this.debug.Multiline = true;
             this.debug.Name = "debug";
             this.debug.ReadOnly = true;
@@ -129,7 +132,7 @@
             this.mousePanel.Location = new System.Drawing.Point(11, 133);
             this.mousePanel.MinimumSize = new System.Drawing.Size(218, 127);
             this.mousePanel.Name = "mousePanel";
-            this.mousePanel.Size = new System.Drawing.Size(218, 140);
+            this.mousePanel.Size = new System.Drawing.Size(218, 128);
             this.mousePanel.TabIndex = 10;
             this.mousePanel.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mousePanel_MouseClick);
             this.mousePanel.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mousePanel_MouseDoubleClick);
@@ -173,11 +176,25 @@
             this.cboxMouseMid.UseVisualStyleBackColor = true;
             this.cboxMouseMid.CheckedChanged += new System.EventHandler(this.cboxMouseMid_CheckedChanged);
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(11, 284);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(218, 134);
+            this.pictureBox1.TabIndex = 14;
+            this.pictureBox1.TabStop = false;
+            // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
+            // 
             // CtrlPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(241, 347);
+            this.ClientSize = new System.Drawing.Size(241, 501);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.cboxMouseMid);
             this.Controls.Add(this.cboxMouseRight);
             this.Controls.Add(this.cboxMouseLeft);
@@ -192,7 +209,9 @@
             this.KeyPreview = true;
             this.Name = "CtrlPanel";
             this.Text = "MouseKeyRelay";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CtrlPanel_FormClosed);
             this.Load += new System.EventHandler(this.CtrlPanel_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -211,6 +230,8 @@
         private System.Windows.Forms.CheckBox cboxMouseLeft;
         private System.Windows.Forms.CheckBox cboxMouseRight;
         private System.Windows.Forms.CheckBox cboxMouseMid;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 

@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.IO.Ports;
 using System.Configuration;
+using OpenCvSharp;
+
 
 namespace MouseKeyRelay
 {
@@ -19,6 +21,13 @@ namespace MouseKeyRelay
         private Keyboard keyboard;
         private Mouse mouse;
 
+        Mat frame;
+        VideoCapture capture;
+        Bitmap bmp;
+        Graphics graphic;
+
+
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -26,6 +35,33 @@ namespace MouseKeyRelay
         {
             InitializeComponent();
             serialConnector = new SerialPort();
+
+            capture = new VideoCapture(0);
+            if (!capture.IsOpened())
+            {
+                MessageBox.Show("camera was not found!");
+                this.Close();
+            }
+            capture.FrameWidth = pictureBox1.Width;
+            capture.FrameHeight = pictureBox1.Height;
+
+            //取得先のMat作成
+            frame = new Mat(pictureBox1.Height, pictureBox1.Width, MatType.CV_8UC3);
+
+            //表示用のBitmap作成
+            bmp = new Bitmap(frame.Cols, frame.Rows, (int)frame.Step(), System.Drawing.Imaging.PixelFormat.Format24bppRgb, frame.Data);
+
+            //PictureBoxを出力サイズに合わせる
+            pictureBox1.Width = frame.Cols;
+            pictureBox1.Height = frame.Rows;
+
+            //描画用のGraphics作成
+            graphic = pictureBox1.CreateGraphics();
+
+            //画像取得スレッド開始
+            backgroundWorker1.RunWorkerAsync();
+
+
         }
         /// <summary>
         /// フォームの初期化
@@ -38,12 +74,19 @@ namespace MouseKeyRelay
                 mouse = new Mouse(int.Parse(ConfigurationManager.AppSettings.Get("mouseSpeed")));
                 // シリアル接続
                 connectCOM();
+
+
+
             }
             catch (Exception ex)
             {
                 debug.Text = ex.Message;
             }
         }
+
+
+
+
         /// <summary>
         /// COM接続。パラメータはapp.configから読み込む。
         /// </summary>
@@ -197,7 +240,7 @@ namespace MouseKeyRelay
             if (serialConnector.IsOpen)
             {
                 int codeX = 0, codeY = 0;
-                mouse.mouseMove(new Point(e.X, e.Y), mousePanel.Size.Width, mousePanel.Size.Height, ref codeX, ref codeY);
+                mouse.mouseMove(new System.Drawing.Point(e.X, e.Y), mousePanel.Size.Width, mousePanel.Size.Height, ref codeX, ref codeY);
                 if (codeX > 0)
                 { 
                     serialConnector.Write(codeX + ";");
@@ -287,6 +330,33 @@ namespace MouseKeyRelay
                 serialConnector.Write(mouse.mouseWheel(e.Delta) + ";");
                 //outputKey.Text = "" + mouse.mouseWheel(e.Delta);
             }
+        }
+
+        private void CtrlPanel_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            //スレッドの終了を待機
+            backgroundWorker1.CancelAsync();
+            while (backgroundWorker1.IsBusy)
+                Application.DoEvents();
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker bw = (BackgroundWorker)sender;
+
+            while (!backgroundWorker1.CancellationPending)
+            {
+                //画像取得
+                capture.Grab();
+                OpenCvSharp.Internal.NativeMethods.videoio_VideoCapture_operatorRightShift_Mat(capture.CvPtr, frame.CvPtr);
+                bw.ReportProgress(0);
+            }
+        }
+
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            //描画
+            graphic.DrawImage(bmp, 0, 0, frame.Cols, frame.Rows);
         }
     }
 }
