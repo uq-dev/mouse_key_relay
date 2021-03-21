@@ -10,12 +10,15 @@ namespace MouseKeyRelay
 {
     class Mouse
     {
-        private bool isDraging = false;
-        private bool isMoving = false;
-        // private Point? _diffPoint = null;
-
         private Point? prePoint = null;
-        private int mouseSpeed = 0;
+
+        private double displayLateX;
+        private double displayLateY;
+
+        private double guestWidth;
+        private double guestHeight;
+
+        private int maxDiff = 0x7F; // 一度に入力できる移動量の最大値
 
         private Dictionary<MouseButtons, int> btnCmdDicRelease = new Dictionary<MouseButtons, int>()
             {
@@ -35,67 +38,111 @@ namespace MouseKeyRelay
               {MouseButtons.Right, 0x422},
               {MouseButtons.Middle, 0x442}
             };
+        public Mouse(double hostWidth, double hostHeight, double guestWidth, double guestHeight)
+        {
+            this.guestWidth = guestWidth;
+            this.guestHeight = guestHeight;
 
-        public Mouse(int mouseSpeed) {
-            this.mouseSpeed = mouseSpeed;
             this.prePoint = new Point(0, 0);
+
+            this.displayLateX = guestWidth / hostWidth;
+            this.displayLateY = guestHeight / hostHeight;
+
         }
-        public void mouseDown(Point point)
-        {
-            isDraging = true;
-            prePoint = point;
+        public void setPrePoint(Point point) {
+            this.prePoint = point;
         }
-        public void mouseUp()
+        public void setPanelSize(double hostWidth, double hostHeight)
         {
-            isDraging = false;
-            isMoving = false;
+            this.displayLateX = guestWidth / hostWidth;
+            this.displayLateY = guestHeight / hostHeight;
         }
-        public void mouseMove(Point point, int panelWidth, int panelHeight, ref int codeX, ref int codeY)
+
+
+        public List<int> mousePointReset()
         {
-            if (!isDraging)
+            List<int> result = new List<int>();
+            for (int i = 0; i < guestWidth; i += maxDiff)
             {
-                return;
+                result.Add(0x680 + maxDiff);
             }
-            isMoving = true;
+            for (int i = 0; i < guestHeight; i += maxDiff)
+            {
+                result.Add(0x780 + maxDiff);
+            }
+            prePoint = new Point(0, 0);
+            return result;
+        }
+
+        public List<int> mouseMove(Point point)
+        {
+            List<int> result = new List<int>();
 
             int x = point.X;
             int y = point.Y;
-            //　パネルからはみ出した場合は前回の位置に補正
-            if (x < 0 || x > panelWidth)
-            {
-                x = prePoint.Value.X;
-            }
-            if (y < 0 || y > panelHeight)
-            {
-                y = prePoint.Value.Y;
-            }
+
             int diffX = prePoint.Value.X - x;
             int diffY = prePoint.Value.Y - y;
 
             // マウス移動距離を計算して転送する
-            if (prePoint.Value.X - x < 0)
+            if (diffX < 0)
             {
-                codeX = 0x600 + Math.Abs(diffX) * mouseSpeed;
-            }
-            if (prePoint.Value.X - x > 0)
-            {
-                codeX = 0x680 + Math.Abs(diffX) * mouseSpeed;
-            }
-            if (prePoint.Value.Y - y < 0)
-            {
-                codeY = 0x700 + Math.Abs(diffY) * mouseSpeed;
-            }
-            if (prePoint.Value.Y -y > 0)
-            {
-                codeY = 0x780 + Math.Abs(diffY) * mouseSpeed;
-            }
+                // 右移動
+                int i = (int)Math.Round(Math.Abs(diffX) * displayLateX);
 
+                while (i > maxDiff)
+                {
+                    result.Add(0x600 + maxDiff);
+                    i -= maxDiff;
+                }
+                result.Add(0x600 + i);
+            }
+            if (diffX > 0)
+            {
+                // 左移動
+                int i = (int)Math.Round(Math.Abs(diffX) * displayLateX);
+
+                while (i > maxDiff)
+                {
+                    result.Add(0x680 + maxDiff);
+                    i -= maxDiff;
+                }
+                result.Add(0x680 + i);
+            }
+            if (diffY < 0)
+            {
+                // 下移動
+                int i = (int)Math.Round(Math.Abs(diffY) * displayLateY);
+
+                while (i > maxDiff)
+                {
+                    result.Add(0x700 + maxDiff);
+                    i -= maxDiff;
+                }
+                result.Add(0x700 + i);
+            }
+            if (diffY > 0)
+            {
+                // 上移動
+                int i = (int)Math.Round(Math.Abs(diffY) * displayLateY);
+
+                while (i > maxDiff)
+                {
+                    result.Add(0x780 + maxDiff);
+                    i -= maxDiff;
+                }
+                result.Add(0x780 + i);
+
+            }
             // 現在位置を更新
             prePoint = point;
+            return result;
         }
+
+
         public int mouseBtnClick(MouseButtons btn) {
             // マウスクリック
-            if (isMoving || !btnCmdDicClick.ContainsKey(btn))
+            if (!btnCmdDicClick.ContainsKey(btn))
             {
                 return 0;
             }
@@ -130,5 +177,6 @@ namespace MouseKeyRelay
             }
             return result;
         }
+
     }
 }

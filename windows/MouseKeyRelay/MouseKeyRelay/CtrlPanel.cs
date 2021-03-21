@@ -35,9 +35,16 @@ namespace MouseKeyRelay
             try
             {
                 keyboard = new Keyboard();
-                mouse = new Mouse(int.Parse(ConfigurationManager.AppSettings.Get("mouseSpeed")));
+
+                mouse = new Mouse(
+                    this.mousePanel.Width, this.mousePanel.Height,
+                    int.Parse(ConfigurationManager.AppSettings.Get("guestWidth")),
+                    int.Parse(ConfigurationManager.AppSettings.Get("guestHeight"))
+                );
                 // シリアル接続
                 connectCOM();
+
+                resetMousePoint();
             }
             catch (Exception ex)
             {
@@ -180,13 +187,11 @@ namespace MouseKeyRelay
         {
             if (serialConnector.IsOpen)
             {
-                if (e.Button != MouseButtons.Left)
+                int cmdCode = mouse.mouseBtnPush(e.Button);
+                if (cmdCode > 0)
                 {
-                    return;
+                    serialConnector.Write(cmdCode + ";");
                 }
-                Cursor.Current = Cursors.Hand;
-
-                mouse.mouseDown(e.Location);
             }
         }
         /// <summary>
@@ -196,16 +201,18 @@ namespace MouseKeyRelay
         {
             if (serialConnector.IsOpen)
             {
-                int codeX = 0, codeY = 0;
-                mouse.mouseMove(new Point(e.X, e.Y), mousePanel.Size.Width, mousePanel.Size.Height, ref codeX, ref codeY);
-                if (codeX > 0)
-                { 
-                    serialConnector.Write(codeX + ";");
-                }
-                if (codeY > 0)
+                List<int> cmdCodeList = mouse.mouseMove(new Point(e.X, e.Y));
+
+                for (int i = 0; i < cmdCodeList.Count; i++)
                 {
-                    serialConnector.Write(codeY + ";");
+                    serialConnector.Write(cmdCodeList[i] + ";");
+                    /*
+                    System.IO.File.AppendAllText(@"log.txt",
+                        String.Format("x:{0} y:{1} idx:{2} cmd:{3}\n", e.X, e.Y, i, cmdCodeList[i]));
+                        */
                 }
+
+
             }
         }
         /// <summary>
@@ -215,68 +222,45 @@ namespace MouseKeyRelay
         {
             if (serialConnector.IsOpen)
             {
-                Cursor.Current = Cursors.Default;
+                int cmdCode = mouse.mouseBtnRelease(e.Button);
+                if (cmdCode > 0)
+                {
+                    serialConnector.Write(cmdCode + ";");
+                }
 
-                if (e.Button != MouseButtons.Left)
-                {
-                    return;
-                }
-                mouse.mouseUp();
             }
         }
         /// <summary>
-        /// マウス左ボタン
+        /// マウス位置のリセット(左上に初期化)
         /// </summary>
-        private void cboxMouseLeft_CheckedChanged(object sender, EventArgs e)
+        private void resetMousePoint()
         {
+            if (serialConnector.IsOpen)
+            {
+                List<int> cmdCodeList = mouse.mousePointReset();
+                for (int i = 0; i < cmdCodeList.Count; i++)
+                {
+                    serialConnector.Write(cmdCodeList[i] + ";");
+                }
+            }
 
-            if (serialConnector.IsOpen)
-            {
-                if (cboxMouseLeft.Checked)
-                {
-                    serialConnector.Write(mouse.mouseBtnPush(MouseButtons.Left) + ";");
-                }
-                else
-                {
-                    serialConnector.Write(mouse.mouseBtnRelease(MouseButtons.Left) + ";");
-                }
-                
-            }
         }
         /// <summary>
-        /// マウス右ボタン
+        /// トラックパッド領域からの離脱
         /// </summary>
-        private void cboxMouseRight_CheckedChanged(object sender, EventArgs e)
+        private void mousePanel_MouseLeave(object sender, EventArgs e)
         {
-            if (serialConnector.IsOpen)
-            {
-                if (cboxMouseRight.Checked)
-                {
-                    serialConnector.Write(mouse.mouseBtnPush(MouseButtons.Right) + ";");
-                }
-                else
-                {
-                    serialConnector.Write(mouse.mouseBtnRelease(MouseButtons.Right) + ";");
-                }
-            }
+            resetMousePoint();
         }
         /// <summary>
-        /// マウス中央ボタン
+        /// トラックパッド領域のリサイズ
         /// </summary>
-        private void cboxMouseMid_CheckedChanged(object sender, EventArgs e)
+        private void mousePanel_Resize(object sender, EventArgs e)
         {
-            if (serialConnector.IsOpen)
-            {
-                if (cboxMouseMid.Checked)
-                {
-                    serialConnector.Write(mouse.mouseBtnPush(MouseButtons.Middle) + ";");
-                }
-                else
-                {
-                    serialConnector.Write(mouse.mouseBtnRelease(MouseButtons.Middle) + ";");
-                }
-            }
+            mouse.setPanelSize(this.mousePanel.Width, this.mousePanel.Height);
         }
+
+ 
         /// <summary>
         /// マウスホイールイベント
         /// </summary>
@@ -285,8 +269,11 @@ namespace MouseKeyRelay
             if (serialConnector.IsOpen)
             {
                 serialConnector.Write(mouse.mouseWheel(e.Delta) + ";");
-                //outputKey.Text = "" + mouse.mouseWheel(e.Delta);
             }
         }
+
+
+
+
     }
 }

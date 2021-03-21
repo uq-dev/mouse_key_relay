@@ -36,9 +36,6 @@
             this.outputKey = new System.Windows.Forms.TextBox();
             this.debug = new System.Windows.Forms.TextBox();
             this.mousePanel = new System.Windows.Forms.Panel();
-            this.cboxMouseLeft = new System.Windows.Forms.CheckBox();
-            this.cboxMouseRight = new System.Windows.Forms.CheckBox();
-            this.cboxMouseMid = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // cboxKeyInput
@@ -111,12 +108,12 @@
             // 
             this.debug.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.debug.Location = new System.Drawing.Point(11, 286);
+            this.debug.Location = new System.Drawing.Point(11, 246);
             this.debug.Multiline = true;
             this.debug.Name = "debug";
             this.debug.ReadOnly = true;
             this.debug.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.debug.Size = new System.Drawing.Size(218, 49);
+            this.debug.Size = new System.Drawing.Size(217, 49);
             this.debug.TabIndex = 7;
             this.debug.TabStop = false;
             // 
@@ -125,62 +122,26 @@
             this.mousePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.mousePanel.BackColor = System.Drawing.SystemColors.AppWorkspace;
-            this.mousePanel.Location = new System.Drawing.Point(11, 133);
+            this.mousePanel.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.mousePanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.mousePanel.Location = new System.Drawing.Point(11, 103);
             this.mousePanel.MinimumSize = new System.Drawing.Size(218, 127);
             this.mousePanel.Name = "mousePanel";
-            this.mousePanel.Size = new System.Drawing.Size(218, 140);
+            this.mousePanel.Size = new System.Drawing.Size(218, 127);
             this.mousePanel.TabIndex = 10;
             this.mousePanel.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mousePanel_MouseClick);
             this.mousePanel.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.mousePanel_MouseDoubleClick);
             this.mousePanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mousePanel_MouseDown);
+            this.mousePanel.MouseLeave += new System.EventHandler(this.mousePanel_MouseLeave);
             this.mousePanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.mousePanel_MouseMove);
             this.mousePanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mousePanel_MouseUp);
-            // 
-            // cboxMouseLeft
-            // 
-            this.cboxMouseLeft.AutoSize = true;
-            this.cboxMouseLeft.Location = new System.Drawing.Point(11, 92);
-            this.cboxMouseLeft.Name = "cboxMouseLeft";
-            this.cboxMouseLeft.Size = new System.Drawing.Size(105, 16);
-            this.cboxMouseLeft.TabIndex = 11;
-            this.cboxMouseLeft.TabStop = false;
-            this.cboxMouseLeft.Text = "MouseLeftDown";
-            this.cboxMouseLeft.UseVisualStyleBackColor = true;
-            this.cboxMouseLeft.CheckedChanged += new System.EventHandler(this.cboxMouseLeft_CheckedChanged);
-            // 
-            // cboxMouseRight
-            // 
-            this.cboxMouseRight.AutoSize = true;
-            this.cboxMouseRight.Location = new System.Drawing.Point(118, 92);
-            this.cboxMouseRight.Name = "cboxMouseRight";
-            this.cboxMouseRight.Size = new System.Drawing.Size(112, 16);
-            this.cboxMouseRight.TabIndex = 12;
-            this.cboxMouseRight.TabStop = false;
-            this.cboxMouseRight.Text = "MouseRightDown";
-            this.cboxMouseRight.UseVisualStyleBackColor = true;
-            this.cboxMouseRight.CheckedChanged += new System.EventHandler(this.cboxMouseRight_CheckedChanged);
-            // 
-            // cboxMouseMid
-            // 
-            this.cboxMouseMid.AutoSize = true;
-            this.cboxMouseMid.Location = new System.Drawing.Point(68, 110);
-            this.cboxMouseMid.Name = "cboxMouseMid";
-            this.cboxMouseMid.Size = new System.Drawing.Size(103, 16);
-            this.cboxMouseMid.TabIndex = 13;
-            this.cboxMouseMid.TabStop = false;
-            this.cboxMouseMid.Text = "MouseMidDown";
-            this.cboxMouseMid.UseVisualStyleBackColor = true;
-            this.cboxMouseMid.CheckedChanged += new System.EventHandler(this.cboxMouseMid_CheckedChanged);
+            this.mousePanel.Resize += new System.EventHandler(this.mousePanel_Resize);
             // 
             // CtrlPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(241, 347);
-            this.Controls.Add(this.cboxMouseMid);
-            this.Controls.Add(this.cboxMouseRight);
-            this.Controls.Add(this.cboxMouseLeft);
+            this.ClientSize = new System.Drawing.Size(240, 307);
             this.Controls.Add(this.mousePanel);
             this.Controls.Add(this.debug);
             this.Controls.Add(this.outputKey);
@@ -191,6 +152,7 @@
             this.Controls.Add(this.cboxKeyInput);
             this.KeyPreview = true;
             this.Name = "CtrlPanel";
+            this.Opacity = 0.5D;
             this.Text = "MouseKeyRelay";
             this.Load += new System.EventHandler(this.CtrlPanel_Load);
             this.ResumeLayout(false);
@@ -208,9 +170,6 @@
         private System.Windows.Forms.TextBox outputKey;
         private System.Windows.Forms.TextBox debug;
         private System.Windows.Forms.Panel mousePanel;
-        private System.Windows.Forms.CheckBox cboxMouseLeft;
-        private System.Windows.Forms.CheckBox cboxMouseRight;
-        private System.Windows.Forms.CheckBox cboxMouseMid;
     }
 }
 
